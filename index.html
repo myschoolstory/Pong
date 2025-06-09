@@ -96,9 +96,7 @@
             y: canvas.height / 2 - paddleHeight / 2,
             width: paddleWidth,
             height: paddleHeight,
-            score: 0,
-            upPressed: false,
-            downPressed: false
+            score: 0
         };
         
         // Player 2 paddle (right)
@@ -107,9 +105,7 @@
             y: canvas.height / 2 - paddleHeight / 2,
             width: paddleWidth,
             height: paddleHeight,
-            score: 0,
-            upPressed: false,
-            downPressed: false
+            score: 0
         };
         
         // Ball properties
@@ -122,8 +118,7 @@
             maxSpeed: 12,
             hitCount: 0,
             glitchTimer: 0,
-            glitchActive: false,
-            teleportCooldown: 0
+            glitchActive: false
         };
         
         // Input handling
@@ -159,27 +154,8 @@
             ball.radius = 8;
             ball.glitchTimer = 0;
             ball.glitchActive = false;
-            ball.teleportCooldown = 0;
             powerUpActive = false;
             powerUpTimer = 0;
-        }
-        
-        function updatePaddles() {
-            // Player 1 controls (W/S)
-            if (keys['w'] && player1.y > 0) {
-                player1.y -= paddleSpeed;
-            }
-            if (keys['s'] && player1.y < canvas.height - player1.height) {
-                player1.y += paddleSpeed;
-            }
-            
-            // Player 2 controls (Arrow keys)
-            if (keys['ArrowUp'] && player2.y > 0) {
-                player2.y -= paddleSpeed;
-            }
-            if (keys['ArrowDown'] && player2.y < canvas.height - player2.height) {
-                player2.y += paddleSpeed;
-            }
         }
         
         function activatePowerUp(losingPlayer) {
@@ -213,6 +189,53 @@
                     break;
             }
         }
+        
+        function updatePaddles() {
+            // Player 1 controls (W/S)
+            if (keys['w'] && player1.y > 0) {
+                player1.y -= paddleSpeed;
+            }
+            if (keys['s'] && player1.y < canvas.height - player1.height) {
+                player1.y += paddleSpeed;
+            }
+            
+            // Player 2 controls (Arrow keys)
+            if (keys['ArrowUp'] && player2.y > 0) {
+                player2.y -= paddleSpeed;
+            }
+            if (keys['ArrowDown'] && player2.y < canvas.height - player2.height) {
+                player2.y += paddleSpeed;
+            }
+        }
+        
+        function updateBall() {
+            // Handle power-up timer
+            if (powerUpActive) {
+                powerUpTimer--;
+                if (powerUpTimer <= 0) {
+                    powerUpActive = false;
+                    ball.glitchActive = false;
+                    ball.glitchTimer = 0;
+                    if (powerUpType === 'shrink' || powerUpType === 'grow') {
+                        ball.radius = 8; // Reset to normal size
+                    }
+                }
+            }
+            
+            // Handle glitch effect
+            if (ball.glitchActive && ball.glitchTimer > 0) {
+                ball.glitchTimer--;
+                // Random teleportation within opponent's area
+                if (Math.random() < 0.1) {
+                    if (ball.speedX > 0) {
+                        ball.x = canvas.width * 0.6 + Math.random() * canvas.width * 0.3;
+                    } else {
+                        ball.x = canvas.width * 0.1 + Math.random() * canvas.width * 0.3;
+                    }
+                    ball.y = Math.random() * (canvas.height - 100) + 50;
+                }
+            }
+            
             ball.x += ball.speedX;
             ball.y += ball.speedY;
             
